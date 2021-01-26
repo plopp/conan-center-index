@@ -2,6 +2,7 @@ import os
 
 from conans import ConanFile, CMake, tools
 
+
 class AvrocppConan(ConanFile):
     name = "avrocpp"
     versuib = "0.1"
@@ -11,8 +12,12 @@ class AvrocppConan(ConanFile):
     homepage = "https://avro.apache.org/"
     topics = ("serialization", "deserialization")
     settings = "os", "compiler", "build_type", "arch"
-    options = {"shared": [True, False], "fPIC": [True, False]}
-    default_options = {"shared": False, "fPIC": True}
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+        "with_snappy": [True, False],
+    }
+    default_options = {"shared": False, "fPIC": True, "with_snappy": True}
     generators = "cmake", "cmake_find_package"
 
     def config_options(self):
@@ -22,15 +27,21 @@ class AvrocppConan(ConanFile):
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         os.rename("avro-release-" + self.version, "source_subfolder")
-        # os.remove("source_subfolder/lang/c++/FindSnappy.cmake")
-        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"), "project (Avro-cpp)",
-            '''project (Avro-cpp)
+        tools.replace_in_file(
+            os.path.join(self._source_subfolder, "CMakeLists.txt"),
+            "project (Avro-cpp)",
+            """project (Avro-cpp)
                include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-               conan_basic_setup() ''')
+               conan_basic_setup() """,
+        )
 
-        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"), "find_package(Snappy)",
-            "")
-
+        # Let Conan find snappy
+        if self.options.with_snappy:
+            tools.replace_in_file(
+                os.path.join(self._source_subfolder, "CMakeLists.txt"),
+                "find_package(Snappy)",
+                "",
+            )
 
     @property
     def _source_subfolder(self):
@@ -40,23 +51,27 @@ class AvrocppConan(ConanFile):
     def _build_subfolder(self):
         return "build_subfolder"
 
-    def build_requirements(self):
+    def _build_requirements(self):
         self.build_requires("boost/1.75.0")
-        self.build_requires("snappy/1.1.8")
+        if self.options.with_snappy:
+            self.build_requires("snappy/1.1.8")
 
     def package(self):
-        self.copy("*.h", dst="include", src="hello")
-        self.copy("*hello.lib", dst="lib", keep_path=False)
-        self.copy("*.dll", dst="bin", keep_path=False)
-        self.copy("*.so", dst="lib", keep_path=False)
-        self.copy("*.dylib", dst="lib", keep_path=False)
-        self.copy("*.a", dst="lib", keep_path=False)
+        cmake = CMake(self)
+        cmake.configure(source_folder=self._source_subfolder)
+        cmake.install()
 
-    # def package_info(self):
-    #     self.cpp_info.libs = ["hello"]
+    def package_info(self):
+        self.cpp_info.filenames["cmake_find_package"] = "avrocpp"
+        self.cpp_info.filenames["cmake_find_package_multi"] = "avrocpp"
+        self.cpp_info.names["cmake_find_package"] = "AvroCPP"
+        self.cpp_info.names["cmake_find_package_multi"] = "AvroCPP"
+        self.cpp_info.components["avrocpplib"].names["cmake_find_package"] = "avrocpp"
+        self.cpp_info.components["avrocpplib"].names[
+            "cmake_find_package_multi"
+        ] = "avrocpp"
 
     def build(self):
         cmake = CMake(self)
         cmake.configure(source_folder=self._source_subfolder)
         cmake.build()
-
