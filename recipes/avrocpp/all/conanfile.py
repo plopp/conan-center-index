@@ -4,17 +4,24 @@ from conans import ConanFile, CMake, tools
 
 class AvrocppConan(ConanFile):
     name = "avrocpp"
+    versuib = "0.1"
+    license = "Apache License 2.0"
+    url = "https://github.com/conan-io/conan-center-index"
     description = "Avro is a data serialization system."
     homepage = "https://avro.apache.org/"
-    url = "https://github.com/conan-io/conan-center-index"
-    license = "Apache License 2.0"
     topics = ("serialization", "deserialization")
-    # no_copy_source = True
-    # exports_sources = ["CMakeLists.txt"]
-    settings = "os", "arch", "compiler", "build_type"
-    generators = "cmake"
+    settings = "os", "compiler", "build_type", "arch"
+    options = {"shared": [True, False], "fPIC": [True, False]}
+    default_options = {"shared": False, "fPIC": True}
+    generators = "cmake", "cmake_find_package"
 
-    _cmake = None
+    def config_options(self):
+        if self.settings.os == "Windows":
+            del self.options.fPIC
+
+    def source(self):
+        tools.get(**self.conan_data["sources"][self.version])
+        os.rename("avro-release-" + self.version, "source_subfolder")
 
     @property
     def _source_subfolder(self):
@@ -25,17 +32,8 @@ class AvrocppConan(ConanFile):
         return "build_subfolder"
 
     def build_requirements(self):
-        self.build_requires("boost/1.72.0")
-#     libboost-dev
-# libboost-filesystem-dev
-# libboost-iostreams-dev
-# libboost-program-options-dev
-# libboost-system-dev
-
-
-    def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename("avro-release-" + self.version, "source_subfolder")
+        self.build_requires("boost/1.75.0")
+        self.build_requires("snappy/1.1.8")
 
     def package(self):
         self.copy("*.h", dst="include", src="hello")
