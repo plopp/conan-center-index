@@ -22,10 +22,19 @@ class AvrocppConan(ConanFile):
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         os.rename("avro-release-" + self.version, "source_subfolder")
+        # os.remove("source_subfolder/lang/c++/FindSnappy.cmake")
+        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"), "project (Avro-cpp)",
+            '''project (Avro-cpp)
+               include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
+               conan_basic_setup() ''')
+
+        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"), "find_package(Snappy)",
+            "")
+
 
     @property
     def _source_subfolder(self):
-        return "source_subfolder/lang/c++"
+        return os.path.join("source_subfolder", "lang", "c++")
 
     @property
     def _build_subfolder(self):
