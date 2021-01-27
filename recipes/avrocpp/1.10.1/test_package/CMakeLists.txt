@@ -4,6 +4,5 @@ project(test_package CXX)
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 conan_basic_setup()
 
-# find_package(AvroCPP REQUIRED CONFIG)
 add_executable(${PROJECT_NAME} test_package.cpp)
-target_link_libraries(${PROJECT_NAME} CONAN_PKG::avrocpp)
+target_link_libraries(${PROJECT_NAME} PRIVATE ${CONAN_LIBS})

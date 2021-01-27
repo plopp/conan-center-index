@@ -14,9 +14,9 @@ int main() {
   d->init(*in);
 
   int64_t decoded;
-  avro::decode(*d, c2);
+  avro::decode(*d, decoded);
 
-  if (dummy != encoded) {
+  if (dummy != decoded) {
     return 1;
   }
   return 0;
