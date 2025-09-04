@@ -11,7 +11,20 @@ required_conan_version = ">=1.54.0"
 AZURE_SDK_MODULES = (
     "azure-storage-common",
     "azure-storage-blobs",
-    "azure-storage-files-shares"
+    "azure-storage-files-shares",
+    "azure-core-amqp",
+    "azure-security-attestation",
+    "azure-messaging-eventhubs-checkpointstore-blobs",
+    "azure-messaging-eventhubs",
+    "azure-identity",
+    "azure-security-keyvault-administration",
+    "azure-security-keyvault-certificates",
+    "azure-security-keyvault-keys",
+    "azure-security-keyvault-secrets",
+    "azure-storage-files-datalake",
+    "azure-storage-queues",
+    "azure-data-tables",
+    "azure-core-tracing-opentelemetry"
 )
 
 class AzureSDKForCppConan(ConanFile):
@@ -26,7 +39,24 @@ class AzureSDKForCppConan(ConanFile):
     options = {"shared": [True, False], "fPIC": [True, False]}
     options.update({_name: [True, False] for _name in AZURE_SDK_MODULES})
     default_options = {"shared": False, "fPIC": True}
-    default_options.update({_name: True for _name in AZURE_SDK_MODULES}) # Build all modules by default, let users pick what they do not want
+    default_options.update({
+        "azure-storage-common": True,
+        "azure-storage-blobs": True,
+        "azure-storage-files-shares": True,
+        "azure-core-amqp": False,
+        "azure-security-attestation": False,
+        "azure-messaging-eventhubs-checkpointstore-blobs": False,
+        "azure-messaging-eventhubs": False,
+        "azure-identity": False,
+        "azure-security-keyvault-administration": False,
+        "azure-security-keyvault-certificates": False,
+        "azure-security-keyvault-keys": False,
+        "azure-security-keyvault-secrets": False,
+        "azure-storage-files-datalake": False,
+        "azure-storage-queues": False,
+        "azure-data-tables": False,
+        "azure-core-tracing-opentelemetry": False
+    })
 
     def export_sources(self):
         copy(self, "CMakeLists.txt", src=self.recipe_folder, dst=self.export_sources_folder)
