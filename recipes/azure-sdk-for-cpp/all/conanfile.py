@@ -11,7 +11,20 @@ required_conan_version = ">=1.54.0"
 AZURE_SDK_MODULES = (
     "azure-storage-common",
     "azure-storage-blobs",
-    "azure-storage-files-shares"
+    "azure-storage-files-shares",
+    "azure-core-amqp",
+    "azure-security-attestation",
+    "azure-messaging-eventhubs-checkpointstore-blobs",
+    "azure-messaging-eventhubs",
+    "azure-identity",
+    "azure-security-keyvault-administration",
+    "azure-security-keyvault-certificates",
+    "azure-security-keyvault-keys",
+    "azure-security-keyvault-secrets",
+    "azure-storage-files-datalake",
+    "azure-storage-queues",
+    "azure-data-tables",
+    "azure-core-tracing-opentelemetry"
 )
 
 class AzureSDKForCppConan(ConanFile):
